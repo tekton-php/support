@@ -20,7 +20,7 @@ class Manifest implements ManifestContract {
     }
 
     function get($key, $default = null) {
-        return (isset($manifest[$key])) ? $manifest[$key] : $default;
+        return (isset($this->manifest[$key])) ? $this->manifest[$key] : $default;
     }
 
     function set($key, $value) {
@@ -28,7 +28,7 @@ class Manifest implements ManifestContract {
     }
 
     function has($key) {
-        return (isset($manifest[$key])) ? true : false;
+        return (isset($this->manifest[$key])) ? true : false;
     }
 
     function write($path, $format = 'php') {

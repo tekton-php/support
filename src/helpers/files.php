@@ -3,8 +3,25 @@
 // Create a DS shorthand for the system directory separator
 if (! defined('DS'))
     define('DS', DIRECTORY_SEPARATOR);
-    
+
 /* ------------------------------------ */
+
+if (! function_exists('canonicalize')) {
+    function canonicalize($address)
+    {
+        $address = explode('/', $address);
+        $keys = array_keys($address, '..');
+
+        foreach($keys AS $keypos => $key) {
+            array_splice($address, $key - ($keypos * 2 + 1), 2);
+        }
+
+        $address = implode('/', $address);
+        $address = str_replace('./', '', $address);
+
+        return $address;
+    }
+}
 
 if (! function_exists('ensure_dir_exists')) {
     function ensure_dir_exists($path, $permissions = 0775)

@@ -1,11 +1,12 @@
 <?php namespace Tekton\Support\Traits;
 
-trait Singleton {
+trait Singleton
+{
+    public static $instance;
 
-    static $instance;
-
-    static function instance() {
-        if ( ! is_null(self::$instance)) {
+    public static function getInstance()
+    {
+        if (! is_null(self::$instance)) {
             return self::$instance;
         }
 

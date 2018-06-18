@@ -1,6 +1,6 @@
 <?php namespace Tekton\Support\Contracts;
 
-interface Singleton {
-
-    function instance();
+interface Singleton
+{
+    public static function getInstance();
 }

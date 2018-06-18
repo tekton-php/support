@@ -2,40 +2,44 @@
 
 use Tekton\Support\Manifest;
 
-class CachedManifest extends Manifest {
-
+class CachedManifest extends Manifest
+{
     protected $cachePath;
 
-    function __construct($id, $cacheDir, $manifest = []) {
-        $this->cacheDir = $cacheDir;
-        $this->cachePath = $cacheDir.DS.'manifest'.DS.$id.'.php';
+    public function __construct(string $path, string $cachePath, array $manifest = [])
+    {
+        $cacheDir = ensure_dir_exists(dirname($cachePath));
+        $this->cachePath = $cacheDir.DS.basename($cachePath, '.php').'.php';
 
-        parent::__construct($id, $manifest);
+        parent::__construct($path, $manifest);
     }
 
-    function load($path) {
-        if ( ! file_exists($path)) {
+    public function load()
+    {
+        // Mark manifest as loaded
+        if ($this->loaded) {
+            return;
+        }
+        else {
+            $this->loaded = true;
+        }
+
+        if (! file_exists($this->path)) {
             return $this->manifest = [];
         }
-        
-        // The cache is based on file modification time and compares the cached
-        // manifest with the real manifest
-        $manifestTime = filemtime($path);
 
-        // If the cache is up to date we return that one
+        // See if the cached file exists
         if (file_exists($this->cachePath)) {
-            if (filemtime($this->cachePath) == $manifestTime) {
-                return $this->manifest = $this->parse($this->cachePath);
+            // Compare and see if the cache is created after the original
+            // and if it is, load the cached version
+            if (filemtime($this->path) < filemtime($this->cachePath)) {
+                $this->manifest = $this->parse($this->cachePath, 'php');
+                return;
             }
         }
 
         // Return the fresh manifest and cache it for future access
-        $this->manifest = $this->parse($path);
-        $this->write($this->cachePath, 'php');
-
-        // Set modification time of the cache file to the same as the source file
-        touch($this->cachePath, $manifestTime);
-
-        return $this->manifest;
+        $this->manifest = $this->parse($this->path, $this->format);
+        return $this->write($this->cachePath, 'php');
     }
 }

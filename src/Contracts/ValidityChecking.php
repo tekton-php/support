@@ -1,5 +1,6 @@
 <?php namespace Tekton\Support\Contracts;
 
-interface ValidityChecking {
-    function is_valid();
+interface ValidityChecking
+{
+    public function isValid();
 }

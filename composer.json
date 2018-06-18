@@ -3,7 +3,7 @@
     "type": "library",
     "license": "MIT",
     "description": "The support project is a small collection of utility functions and classes/traits that can be reused in other projects.",
-    "homepage": "https://gitlab.com/tekton/support",
+    "homepage": "https://github.com/tekton-php/support",
     "autoload": {
         "psr-4": {
             "Tekton\\Support\\": "src/"
@@ -15,6 +15,7 @@
     "minimum-stability": "dev",
     "require": {
         "php": ">=7.0.0",
-        "illuminate/support": "~5.4.0"
+        "illuminate/support": "~5.4.0",
+        "symfony/yaml": "^3.3.0"
     }
 }

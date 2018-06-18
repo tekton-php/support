@@ -1,17 +1,16 @@
 <?php namespace Tekton\Support\Traits;
 
-trait LibraryWrapper {
+trait LibraryWrapper
+{
     protected $library;
 
-    function library() {
+    public function getLibrary()
+    {
         return $this->library;
     }
 
-    static function __callStatic($name, $args) {
-        return forward_static_call_array(array($this->library, $name), $args);
-    }
-
-    function __call($name, $args) {
-        return call_user_func_array(array($this->library, $name), $args);
+    public function __call(string $method, array $args)
+    {
+        return call_user_func_array(array($this->library, $method), $args);
     }
 }

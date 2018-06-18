@@ -1,92 +1,106 @@
 <?php namespace Tekton\Support;
 
-use \Tekton\Support\Contracts\BasicPropertyTesting;
-use \Tekton\Support\Contracts\AliasTranslation;
-use \Tekton\Support\Contracts\UndefinedPropertyHandling;
-use \Tekton\Support\Contracts\ObjectCaching;
+use BadMethodCallException;
+use Tekton\Support\SimpleStore;
 
-abstract class SmartObject implements BasicPropertyTesting, AliasTranslation, UndefinedPropertyHandling, ObjectCaching {
+class SmartObject extends SimpleStore
+{
+    protected $data = [];
+    protected $aliases = [];
+    protected $_alias_lookup = [];
 
-    use \Tekton\Support\Traits\PropertyTests;
-    use \Tekton\Support\Traits\ObjectPropertyCache;
-    use \Tekton\Support\Traits\PropertyAliases;
-
-    protected $get_method = null;
-
-    // Ability to dynamically set get_method on creation
-    function __construct($get_method = null) {
-        if (is_callable($get_method)) {
-            $this->get_method = $get_method;
-        }
-    }
-
-    function get_property($key) {
-        return null;
-    }
-
-    function __call($name, $args) {
-        $method = '';
-        $property = $name;
-
-        // has_
-        if (starts_with($name, 'has_')) {
-            $property = substr($name, 4);
-            $method = 'has';
-        }
-        // is_
-        elseif (starts_with($name, 'is_')) {
-            $property = substr($name, 3);
-            $method = 'is';
+    public function translateAlias(string $key)
+    {
+        // See if aliases has been set
+        if (! isset($this->aliases) || empty($this->aliases)) {
+            return $key;
         }
 
-        // Translate property alias
-        $property = $this->translate_alias($property);
-
-        // Test the property
-        if ( ! empty($method)) {
-            return $this->{$method}($property);
-        }
-        else {
-            $value = $this->{$property};
-
-            if ($value) {
-                // See if the property is callable
-                if (is_callable($value)) {
-                    return call_user_func_array($value, $args);
+        // Set aliases
+        if (empty($this->_alias_lookup)) {
+            foreach ($this->aliases as $property => $value) {
+                if (! is_array($value)) {
+                    $value = [$value];
                 }
-                // Echo the property
-                else {
-                    echo $value;
-                    return $value;
+
+                foreach ($value as $alias) {
+                    $this->_alias_lookup[$alias] = $property;
                 }
             }
         }
 
-        throw new \ErrorException('Undefined method called, "'.$name.'", on '.self::class);
+        return (isset($this->_alias_lookup[$key])) ? $this->_alias_lookup[$key] : $key;
     }
 
-    function __get($key) {
-        // Translate property alias
-        $key = $this->translate_alias($key);
+    public function retrieveProperty($key = null)
+    {
+        return null;
+    }
 
-        // Get value from cache
-        if ($this->cache_exists($key)) {
-            return $this->cache_get($key);
+    public function exists(string $key)
+    {
+        // Translate key so that we correctly map the $key to a property name
+        $key = $this->translateAlias($key);
+
+        // Make sure it's retrieved before we test if it exists or not (DynamicObject
+        // sets a key to null if it's been retrieved but wasn't found)
+        if (! array_key_exists($key, $this->data)) {
+            $this->data[$key] = $this->retrieveProperty($key);
         }
 
-        // Get value of property
-        if (is_callable($this->get_method)) {
-            $value = $this->get_method($key);
+        // Test if it's set or if it's null
+        return isset($this->data[$key]);
+    }
+
+    public function get(string $key, $default = null)
+    {
+        // Translate key so that we correctly map the $key to a property name
+        $key = $this->translateAlias($key);
+
+        // Make sure it's retrieved before we test if it exists or not (DynamicObject
+        // sets a key to null if it's been retrieved but wasn't found)
+        if (! array_key_exists($key, $this->data)) {
+            $this->data[$key] = $this->retrieveProperty($key);
+        }
+
+        // Validate object before returning
+        if (isset($this->data[$key])) {
+            // If it is not a valid object we can make life a lot easier by
+            // setting it to null instead
+            if ($this->data[$key] instanceof ValidityChecking && ! $this->data[$key]->isValid()) {
+                $this->data[$key] = null;
+            }
+        }
+
+        // Return default if the data is null
+        return $this->data[$key] ?? $default;
+    }
+
+    public function set(string $key, $value)
+    {
+        // Translate key so that we correctly map the $key to a property name
+        $key = $this->translateAlias($key);
+
+        $this->data[$key] = $value;
+
+        return $this;
+    }
+
+    function __toString()
+    {
+        return $this->get(null, '');
+    }
+
+    public function __call(string $method, array $args)
+    {
+        if (! is_null($value = $this->get($method, null))) {
+            // Make sure it's callable
+            if (is_callable($value)) {
+                return call_user_func_array($value, $args);
+            }
         }
         else {
-            $value = $this->get_property($key);
+            throw new BadMethodCallException("The method $method doesn't exist on ".get_class($this));
         }
-
-        // Save in cache
-        if ($this->cache_active()) {
-            return $this->cache_set($key, $value);
-        }
-
-        return $value;
     }
 }

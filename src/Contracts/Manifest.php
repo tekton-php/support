@@ -1,16 +1,14 @@
 <?php namespace Tekton\Support\Contracts;
 
-interface Manifest {
+use Tekton\Support\Contracts\SimpleStore;
 
-    function get($key, $default = null);
+interface Manifest extends SimpleStore
+{
+    public function save();
 
-    function set($key, $value);
+    public function write(string $path, $format = null);
 
-    function has($key);
+    public function load();
 
-    function write($path, $format = 'php');
-
-    function load($path);
-
-    function parse($path);
+    public function parse(string $path, $format = null);
 }

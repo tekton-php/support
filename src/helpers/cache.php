@@ -13,9 +13,16 @@ if (! function_exists('write_object_to_file')) {
 if (! function_exists('write_string_to_file')) {
     function write_string_to_file(string $path, string $content)
     {
-        // Write file to target directory
-        if (! file_put_contents($path, $content)) {
-            throw new \ErrorException('Failed to write file: '.$path);
+        if (empty($content)) {
+            if (! touch($path)) {
+                throw new \ErrorException('Failed to create file: '.$path);
+            }
+        }
+        else {
+            // Write file to target directory
+            if (! file_put_contents($path, $content)) {
+                throw new \ErrorException('Failed to write to file: '.$path);
+            }
         }
     }
 }

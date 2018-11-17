@@ -2,7 +2,7 @@
     "name": "tekton/support",
     "type": "library",
     "license": "MIT",
-    "description": "The support project is a small collection of utility functions and classes/traits that can be reused in other projects.",
+    "description": "The support project is a collection of utility functions and classes/traits that can be reused in other projects.",
     "homepage": "https://github.com/tekton-php/support",
     "autoload": {
         "psr-4": {
@@ -14,7 +14,10 @@
     },
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.0.0",
-        "illuminate/support": "~5.4.0"
+        "php": ">=7.0.0"
+    },
+    "suggest": {
+        "symfony/process": "Required to use the composer class (~3.2).",
+        "symfony/yaml": "Required to read and write YAML manifests (^3.3.0)."
     }
 }

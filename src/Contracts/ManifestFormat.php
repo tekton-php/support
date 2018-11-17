@@ -1,7 +1,7 @@
 <?php namespace Tekton\Support\Contracts;
 
-interface ManifestFormat {
-
+interface ManifestFormat
+{
     /**
      * Read the manifest from it's storage
      * @param  mixed $uri  The URI handle

@@ -1,18 +1,12 @@
 <?php
 
-// Create a DS shorthand for the system directory separator
-if (! defined('DS'))
-    define('DS', DIRECTORY_SEPARATOR);
-
-/* ------------------------------------ */
-
 if (! function_exists('canonicalize')) {
     function canonicalize($address)
     {
         $address = explode('/', $address);
         $keys = array_keys($address, '..');
 
-        foreach($keys AS $keypos => $key) {
+        foreach($keys as $keypos => $key) {
             array_splice($address, $key - ($keypos * 2 + 1), 2);
         }
 

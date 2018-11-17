@@ -17,16 +17,21 @@ class Manifest extends SimpleStore implements ManifestContract
     protected static $drivers = [];
     protected static $defaultDriver;
 
-    public function __construct(string $path, array $manifest = [])
+    public function __construct(string $path = '', array $manifest = [])
     {
         if (empty(self::$drivers)) {
             self::registerDrivers();
         }
 
-        $this->path = $path;
-        $this->format = pathinfo($this->path, PATHINFO_EXTENSION);
+        if (! empty($path)) {
+            $this->path = $path;
+            $this->format = pathinfo($this->path, PATHINFO_EXTENSION);
+        }
+        else {
+            $this->loaded = true;
+        }
 
-        if (is_array($manifest) && ! empty($manifest)) {
+        if (! empty($manifest)) {
             $this->loaded = true;
             $this->manifest = $manifest;
         }
@@ -37,7 +42,7 @@ class Manifest extends SimpleStore implements ManifestContract
         self::extend('php', PhpFormat::class);
         self::extend('json', JsonFormat::class);
 
-        if (class_exists('\Symfony\Component\Yaml\Yaml')) {
+        if (class_exists('\\Symfony\\Component\\Yaml\\Yaml')) {
             self::extend('yml', YamlFormat::class);
         }
 

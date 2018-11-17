@@ -6,10 +6,23 @@ class CachedManifest extends Manifest
 {
     protected $cachePath;
 
-    public function __construct(string $path, string $cachePath, array $manifest = [])
+    public function __construct(string $path = '', string $cacheDir = '', array $manifest = [])
     {
-        $cacheDir = ensure_dir_exists(dirname($cachePath));
-        $this->cachePath = $cacheDir.DS.basename($cachePath, '.php').'.php';
+        // Set cache dir
+        if (empty($cacheDir)) {
+            $cacheDir = getcwd();
+        }
+        else {
+            $cacheDir = ensure_dir_exists(dirname($path));
+        }
+
+        // Set cache path
+        if (empty($path)) {
+            $this->cachePath = $cacheDir.DS.'_manifest.php';
+        }
+        else {
+            $this->cachePath = $cacheDir.DS.'_manifest.'.pathinfo($path, PATHINFO_FILENAME).'.php';
+        }
 
         parent::__construct($path, $manifest);
     }

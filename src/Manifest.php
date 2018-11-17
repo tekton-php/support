@@ -36,7 +36,11 @@ class Manifest extends SimpleStore implements ManifestContract
     {
         self::extend('php', PhpFormat::class);
         self::extend('json', JsonFormat::class);
-        self::extend('yml', YamlFormat::class);
+
+        if (class_exists('\Symfony\Component\Yaml\Yaml')) {
+            self::extend('yml', YamlFormat::class);
+        }
+
         self::$defaultDriver = 'php';
     }
 

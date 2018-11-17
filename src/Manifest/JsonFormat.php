@@ -32,6 +32,6 @@ class JsonFormat extends FileFormat {
      */
     public function encode(array $manifest)
     {
-        return json_encode($manifest);
+        return json_encode($manifest, JSON_PRETTY_PRINT);
     }
 }
